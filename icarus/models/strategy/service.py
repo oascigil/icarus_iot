@@ -41,19 +41,24 @@ class LeastCongested(Strategy):
         """
         service = content
         
-        if self.debug:
-            print ("\nEvent\n time: " + repr(time) + " receiver  " + repr(receiver) + " service " + repr(service) + " node " + repr(node) + " flow_id " + repr(flow_id) + " deadline " + repr(deadline) + " response " + repr(response)) 
+        #if self.debug:
+        #    print ("\nEvent\n time: " + repr(time) + " receiver  " + repr(receiver) + " service " + repr(service) + " node " + repr(node) + " flow_id " + repr(flow_id) + " destination " + repr(data_destination) + " status " + repr(status)) 
 
-        if node == receiver and status == self.REQUEST:
+        if node == receiver and status == self.REQUEST and exec_destination == -1:
             # Find the least congested node in the network
             minFinTime = float('inf')
             optimal_node = -1
+            min_vm_indx = 0
             for node in self.compSpots.keys():
                 cs = self.compSpots[node]
                 fin_time, vm_indx = cs.getFinishTime(service, time)
                 if minFinTime > fin_time:
+                    min_vm_indx = vm_indx
                     minFinTime = fin_time
                     optimal_node = node
+
+            if self.debug:
+                print ("Optimal node: " + repr(optimal_node) + " " + repr(min_vm_indx) + " " + repr(minFinTime))
             self.controller.start_session(time, receiver, service, log, flow_id)
             # Retrieve the data for the service: take the latency of the
             source_list = self.view.content_source(service)
@@ -61,9 +66,9 @@ class LeastCongested(Strategy):
                 print ("Source list: " + repr(source_list))
             paths = []
             for source in source_list:
-                if self.debug:
-                    print ("Source: " + repr(source))
                 path = self.view.shortest_path(optimal_node, source)
+                # The path should really be reversed but does not matter for the overhead
+                self.controller.forward_content_path(optimal_node, source, flow_id, path)
                 paths.append(path)
             pathDelay = self.view.path_delay(node, optimal_node)
             longest_path = max(paths, key=len)
@@ -71,6 +76,11 @@ class LeastCongested(Strategy):
             linkDelay = self.view.link_delay(optimal_node, next_node)
             status = self.REQUEST
             exec_destination = optimal_node
+            if self.debug:
+                print ("Initial REQUEST:")
+                print ("Event\n time: " + repr(time) + " receiver  " + repr(receiver) + " service " + repr(service) + " node " + repr(node) + " flow_id " + repr(flow_id) + " destination " + repr(data_destination) + " exec_destination " + repr(exec_destination) + " status " + repr(status)) 
+                print ("\n")
+                
             self.controller.add_event(time+pathDelay+linkDelay, receiver, service, next_node, flow_id, longest_path[len(longest_path)-1], exec_destination, status)
 
         elif status == self.REQUEST:
@@ -79,12 +89,20 @@ class LeastCongested(Strategy):
                 next_node = path[1]
                 delay = self.view.link_delay(node, next_node)
                 status = self.RESPONSE 
+                if self.debug:
+                    print ("Request reached data_destination: " + repr(data_destination))
+                    print ("Event time: " + repr(time) + " receiver  " + repr(receiver) + " service " + repr(service) + " node " + repr(node) + " flow_id " + repr(flow_id) + " destination " + repr(data_destination) + " exec_destination " + repr(exec_destination) + " status " + repr(status)) 
+                    print ("\n")
                 self.controller.add_event(time+delay, receiver, service, next_node, flow_id, data_destination, exec_destination, status)
 
             else:
                 path = self.view.shortest_path(node, data_destination)
                 next_node = path[1]
                 delay = self.view.link_delay(node, next_node)
+                if self.debug:
+                    print ("Request is on its way to data_destination: " + repr(data_destination))
+                    print ("Event time: " + repr(time) + " receiver  " + repr(receiver) + " service " + repr(service) + " node " + repr(node) + " flow_id " + repr(flow_id) + " destination " + repr(data_destination) + " exec_destination " + repr(exec_destination) + " status " + repr(status)) 
+                    print ("\n")
                 self.controller.add_event(time+delay, receiver, service, next_node, flow_id, data_destination, exec_destination, status)
         elif status == self.RESPONSE:
             if node == exec_destination:
@@ -93,20 +111,38 @@ class LeastCongested(Strategy):
                 compTime, vm_indx = compSpot.getFinishTime(service, time)
                 compSpot.schedule_service(service, vm_indx, time)
                 status = self.EXECUTED
-                self.controller.add_event(time+compTime, receiver, service, node, flow_id, data_destination, exec_destination, status)
+                if self.debug:
+                    print ("Response reached EXEC_destination: " + repr(exec_destination))
+                    print ("Scheduling the execution at vm: " + repr(vm_indx))
+                    print ("Event time: " + repr(time) + " receiver  " + repr(receiver) + " service " + repr(service) + " node " + repr(node) + " flow_id " + repr(flow_id) + " destination " + repr(data_destination) + " exec_destination " + repr(exec_destination) + " status " + repr(status)) 
+                    print ("\n")
+                self.controller.add_event(compTime, receiver, service, node, flow_id, data_destination, exec_destination, status)
             else:
                 path = self.view.shortest_path(node, exec_destination)
                 next_node = path[1]
+                if self.debug:
+                    print ("Response is on its way to Exec_destination: " + repr(exec_destination))
+                    print ("Event time: " + repr(time) + " receiver  " + repr(receiver) + " service " + repr(service) + " node " + repr(node) + " flow_id " + repr(flow_id) + " destination " + repr(data_destination) + " exec_destination " + repr(exec_destination) + " status " + repr(status)) 
+                    print ("\n")
                 delay = self.view.link_delay(node, next_node)
+                #self.controller.forward_content_hop(node, next_node, flow_id) DONE above
                 self.controller.add_event(time+delay, receiver, service, next_node, flow_id, data_destination, exec_destination, status)
         elif status == self.EXECUTED:
             if node == receiver:
+                if self.debug:
+                    print ("Executed response is back to RECEIVER " + repr(receiver))
+                    print ("Event time: " + repr(time) + " receiver  " + repr(receiver) + " service " + repr(service) + " node " + repr(node) + " flow_id " + repr(flow_id) + " destination " + repr(data_destination) + " exec_destination " + repr(exec_destination) + " status " + repr(status)) 
+                    print ("\n")
                 self.controller.end_session(True, time, flow_id)
                 return
             else:
                 path = self.view.shortest_path(node, receiver)
                 next_node = path[1]
                 delay = self.view.link_delay(node, next_node)
+                if self.debug:
+                    print ("Executed Response is on its way back to receiver " + repr(receiver))
+                    print ("Event time: " + repr(time) + " receiver  " + repr(receiver) + " service " + repr(service) + " node " + repr(node) + " flow_id " + repr(flow_id) + " destination " + repr(data_destination) + " exec_destination " + repr(exec_destination) + " status " + repr(status)) 
+                    print ("\n")
                 self.controller.add_event(time+delay, receiver, service, next_node, flow_id, data_destination, exec_destination, status)
         else:
             print ("Error: This should not happen\n")

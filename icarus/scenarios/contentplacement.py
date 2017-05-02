@@ -10,7 +10,7 @@ import collections
 from fnss.util import random_from_pdf
 from icarus.registry import register_content_placement
 
-__all__ = ['uniform_content_placement', 'weighted_content_placement']
+__all__ = ['uniform_content_placement', 'weighted_content_placement', 'replicated_content_placement']
 
 def powerset(seq):
     """
@@ -108,7 +108,7 @@ def weighted_content_placement(topology, contents, source_weights, seed=None):
     apply_content_placement(content_placement, topology)
 
 @register_content_placement('REPLICATED')
-def uniform_content_placement(topology, contents, seed=None):
+def replicated_content_placement(topology, contents, seed=None):
     """Places content objects to source nodes and replicates across source nodes.
 
     Parameters
@@ -133,9 +133,10 @@ def uniform_content_placement(topology, contents, seed=None):
     random.seed(seed)
     source_nodes = get_sources(topology)
     subsets = [x for x in powerset(source_nodes)]
+    subsets.pop() # Remove the last (empty list) element
     content_placement = collections.defaultdict(set)
     for c in contents:
         subset = random.choice(subsets)
-        for node in subsets:
+        for node in subset:
             content_placement[node].add(c)
     apply_content_placement(content_placement, topology)

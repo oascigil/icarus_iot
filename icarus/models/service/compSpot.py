@@ -49,7 +49,7 @@ class ComputationalSpot(object):
         # VM index to service assignment
         self.vmAssignment = {x: [] for x in range(0, numOfVMs)}
         # Actual VM queue occupancies
-        self.vmTailFinishTime = [0 for x in range(0, numOfVMs)]
+        self.vmTailFinishTime = [0.0 for x in range(0, numOfVMs)]
         # VM idle times
         self.idleTime = [0 for x in range(0, numOfVMs)]
         # virtual VM idle times
@@ -138,7 +138,6 @@ class ComputationalSpot(object):
             if self.vmTailFinishTime[index] < minFinishTime:
                 minFinishTime = self.vmTailFinishTime[index]
                 min_index = index
-            
         return [minFinishTime+serviceTime, min_index]
 
     def update_counters(self, time):

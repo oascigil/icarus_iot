@@ -38,7 +38,7 @@ N_REPLICATIONS = 1
 
 # List of metrics to be measured in the experiments
 # The implementation of data collectors are located in ./icaurs/execution/collectors.py
-DATA_COLLECTORS = ['LATENCY']
+DATA_COLLECTORS = ['LATENCY', 'OVERHEAD']
 
 # Range of alpha values of the Zipf distribution using to generate content requests
 # alpha values must be positive. The greater the value the more skewed is the 
@@ -52,7 +52,7 @@ DATA_COLLECTORS = ['LATENCY']
 # This would give problems while trying to plot the results because if for
 # example I wanted to filter experiment with alpha=0.8, experiments with
 # alpha = 0.799999999999 would not be recognized 
-ALPHA = [0.7]
+ALPHA = [0.001]
 #ALPHA = [0.7]
 
 # Total size of network cache as a fraction of content population
@@ -66,16 +66,15 @@ N_SERVICES = N_CONTENTS
 
 # Number of requests per second (over the whole network)
 #NETWORK_REQUEST_RATE = 10.0
-NETWORK_REQUEST_RATE = 100.0
+NETWORK_REQUEST_RATE = 500.0
 
 # Number of content requests generated to prepopulate the caches
 # These requests are not logged
-N_WARMUP_REQUESTS = 0 #30000
+N_WARMUP_REQUESTS = 100 #30000
 
 # Number of content requests generated after the warmup and logged
 # to generate results. 
-#N_MEASURED_REQUESTS = 1000 #60*30000 #100000
-N_MEASURED_REQUESTS = 10*100 #60*30000 #100000
+N_MEASURED_REQUESTS = 10*NETWORK_REQUEST_RATE 
 
 # List of all implemented topologies
 # Topology implementations are located in ./icarus/scenarios/topology.py
@@ -110,8 +109,8 @@ default['workload'] = {'name':       'STATIONARY',
 default['cache_placement']['name'] = 'UNIFORM'
 default['computation_placement']['name'] = 'CENTRALITY'
 default['computation_placement']['n_services'] = N_SERVICES
-default['computation_placement']['computation_budget'] = N_SERVICES*5
-default['content_placement']['name'] = 'UNIFORM'
+default['computation_placement']['computation_budget'] = N_SERVICES/2 #*5
+default['content_placement']['name'] = 'REPLICATED'
 default['cache_policy']['name'] = CACHE_POLICY
 
 default['topology']['name'] = 'TREE'

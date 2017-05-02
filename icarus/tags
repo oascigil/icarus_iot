@@ -86,6 +86,7 @@ NoCache	models/strategy/base.py	/^class NoCache(Strategy):$/;"	c
 NullCache	models/cache/policies.py	/^class NullCache(Cache):$/;"	c
 Orchestrator	orchestration.py	/^class Orchestrator(object):$/;"	c
 Orchestrator	run.py	/^from icarus.orchestration import Orchestrator$/;"	i
+OverheadCollector	execution/collectors.py	/^class OverheadCollector(DataCollector):$/;"	c
 PLOT_EMPTY_GRAPHS	results/plot.py	/^PLOT_EMPTY_GRAPHS = False$/;"	v
 Partition	models/strategy/onpath.py	/^class Partition(Strategy):$/;"	c
 PathCache	models/cache/systems.py	/^class PathCache(object):$/;"	c
@@ -215,7 +216,7 @@ __all__	run.py	/^__all__ = ['run', 'handler']$/;"	v
 __all__	scenarios/algorithms.py	/^__all__ = [$/;"	v
 __all__	scenarios/cacheplacement.py	/^__all__ = [$/;"	v
 __all__	scenarios/compSpotplacement.py	/^__all__ = [$/;"	v
-__all__	scenarios/contentplacement.py	/^__all__ = ['uniform_content_placement', 'weighted_content_placement']$/;"	v
+__all__	scenarios/contentplacement.py	/^__all__ = ['uniform_content_placement', 'weighted_content_placement', 'replicated_content_placement']$/;"	v
 __all__	scenarios/topology.py	/^__all__ = [$/;"	v
 __all__	scenarios/workload.py	/^__all__ = [$/;"	v
 __all__	tools/cacheperf.py	/^__all__ = [$/;"	v
@@ -234,6 +235,7 @@ __getitem__	util.py	/^    def __getitem__(self, name):$/;"	m	class:Settings	file
 __init__	execution/collectors.py	/^    def __init__(self, view):$/;"	m	class:DummyCollector
 __init__	execution/collectors.py	/^    def __init__(self, view, **params):$/;"	m	class:DataCollector
 __init__	execution/collectors.py	/^    def __init__(self, view, cdf=False):$/;"	m	class:LatencyCollector
+__init__	execution/collectors.py	/^    def __init__(self, view, cdf=False):$/;"	m	class:OverheadCollector
 __init__	execution/collectors.py	/^    def __init__(self, view, cdf=False):$/;"	m	class:PathStretchCollector
 __init__	execution/collectors.py	/^    def __init__(self, view, collectors):$/;"	m	class:CollectorProxy
 __init__	execution/collectors.py	/^    def __init__(self, view, off_path_hits=False, per_node=True, content_hits=False):$/;"	m	class:CacheHitRatioCollector
@@ -433,8 +435,8 @@ config_logging	util.py	/^def config_logging(log_level='INFO'):$/;"	f
 content_hop	execution/collectors.py	/^    def content_hop(self, u, v, main_path=True):$/;"	m	class:CollectorProxy
 content_hop	execution/collectors.py	/^    def content_hop(self, u, v, main_path=True):$/;"	m	class:DataCollector
 content_hop	execution/collectors.py	/^    def content_hop(self, u, v, main_path=True):$/;"	m	class:DummyCollector
-content_hop	execution/collectors.py	/^    def content_hop(self, u, v, main_path=True):$/;"	m	class:LatencyCollector
 content_hop	execution/collectors.py	/^    def content_hop(self, u, v, main_path=True):$/;"	m	class:LinkLoadCollector
+content_hop	execution/collectors.py	/^    def content_hop(self, u, v, main_path=True):$/;"	m	class:OverheadCollector
 content_hop	execution/collectors.py	/^    def content_hop(self, u, v, main_path=True):$/;"	m	class:PathStretchCollector
 content_locations	execution/network.py	/^    def content_locations(self, k):$/;"	m	class:NetworkView
 content_source	execution/network.py	/^    def content_source(self, k):$/;"	m	class:NetworkView
@@ -523,7 +525,7 @@ fnss	scenarios/test/test_cacheplacement.py	/^import fnss$/;"	i
 fnss	scenarios/test/test_contentplacement.py	/^import fnss$/;"	i
 fnss	scenarios/topology.py	/^import fnss$/;"	i
 fnss	test/test_util.py	/^import fnss$/;"	i
-forward_content_hop	execution/network.py	/^    def forward_content_hop(self, u, v, main_path=True):$/;"	m	class:NetworkController
+forward_content_hop	execution/network.py	/^    def forward_content_hop(self, u, v, flow_id, main_path=True):$/;"	m	class:NetworkController
 forward_content_path	execution/network.py	/^    def forward_content_path(self, u, v, path=None, main_path=True):$/;"	m	class:NetworkController
 forward_request_hop	execution/network.py	/^    def forward_request_hop(self, u, v, main_path=True):$/;"	m	class:NetworkController
 forward_request_path	execution/network.py	/^    def forward_request_path(self, s, t, path=None, main_path=True):$/;"	m	class:NetworkController
@@ -874,12 +876,11 @@ replace_services	models/strategy/service.py	/^    def replace_services(self, k, 
 replace_services	models/strategy/service.py	/^    def replace_services(self, k, time):$/;"	m	class:StrictestDeadlineFirst
 replacement_interval_over	execution/collectors.py	/^    def replacement_interval_over(self, replacement_interval, timestamp):$/;"	m	class:CollectorProxy
 replacement_interval_over	execution/collectors.py	/^    def replacement_interval_over(self, replacement_interval, timestamp):$/;"	m	class:DataCollector
-replacement_interval_over	execution/collectors.py	/^    def replacement_interval_over(self, replacement_interval, timestamp):$/;"	m	class:LatencyCollector
 replacement_interval_over	execution/network.py	/^    def replacement_interval_over(self, flow_id, replacement_interval, timestamp):$/;"	m	class:NetworkController
+replicated_content_placement	scenarios/contentplacement.py	/^def replicated_content_placement(topology, contents, seed=None):$/;"	f
 request_hop	execution/collectors.py	/^    def request_hop(self, u, v, main_path=True):$/;"	m	class:CollectorProxy
 request_hop	execution/collectors.py	/^    def request_hop(self, u, v, main_path=True):$/;"	m	class:DataCollector
 request_hop	execution/collectors.py	/^    def request_hop(self, u, v, main_path=True):$/;"	m	class:DummyCollector
-request_hop	execution/collectors.py	/^    def request_hop(self, u, v, main_path=True):$/;"	m	class:LatencyCollector
 request_hop	execution/collectors.py	/^    def request_hop(self, u, v, main_path=True):$/;"	m	class:LinkLoadCollector
 request_hop	execution/collectors.py	/^    def request_hop(self, u, v, main_path=True):$/;"	m	class:PathStretchCollector
 reserve_local_cache	execution/network.py	/^    def reserve_local_cache(self, ratio=0.1):$/;"	m	class:NetworkController
@@ -892,6 +893,7 @@ results	execution/collectors.py	/^    def results(self):$/;"	m	class:CollectorPr
 results	execution/collectors.py	/^    def results(self):$/;"	m	class:DataCollector
 results	execution/collectors.py	/^    def results(self):$/;"	m	class:LatencyCollector
 results	execution/collectors.py	/^    def results(self):$/;"	m	class:LinkLoadCollector
+results	execution/collectors.py	/^    def results(self):$/;"	m	class:OverheadCollector
 results	execution/collectors.py	/^    def results(self):$/;"	m	class:PathStretchCollector
 rewire_link	execution/network.py	/^    def rewire_link(self, u, v, up, vp, recompute_paths=True):$/;"	m	class:NetworkController
 run	orchestration.py	/^    def run(self):$/;"	m	class:Orchestrator
@@ -961,10 +963,11 @@ start_session	execution/collectors.py	/^    def start_session(self, timestamp, r
 start_session	execution/collectors.py	/^    def start_session(self, timestamp, receiver, content):$/;"	m	class:DummyCollector
 start_session	execution/collectors.py	/^    def start_session(self, timestamp, receiver, content):$/;"	m	class:LinkLoadCollector
 start_session	execution/collectors.py	/^    def start_session(self, timestamp, receiver, content):$/;"	m	class:PathStretchCollector
-start_session	execution/collectors.py	/^    def start_session(self, timestamp, receiver, content, flow_id=0, deadline=0):$/;"	m	class:CollectorProxy
-start_session	execution/collectors.py	/^    def start_session(self, timestamp, receiver, content, flow_id=0, deadline=0):$/;"	m	class:DataCollector
-start_session	execution/collectors.py	/^    def start_session(self, timestamp, receiver, content, flow_id=0, deadline=0):$/;"	m	class:LatencyCollector
-start_session	execution/network.py	/^    def start_session(self, timestamp, receiver, content, log, flow_id=0, deadline=0):$/;"	m	class:NetworkController
+start_session	execution/collectors.py	/^    def start_session(self, timestamp, receiver, content, flow_id=0):$/;"	m	class:CollectorProxy
+start_session	execution/collectors.py	/^    def start_session(self, timestamp, receiver, content, flow_id=0):$/;"	m	class:DataCollector
+start_session	execution/collectors.py	/^    def start_session(self, timestamp, receiver, content, flow_id=0):$/;"	m	class:LatencyCollector
+start_session	execution/collectors.py	/^    def start_session(self, timestamp, receiver, content, flow_id=0):$/;"	m	class:OverheadCollector
+start_session	execution/network.py	/^    def start_session(self, timestamp, receiver, content, log, flow_id=0):$/;"	m	class:NetworkController
 stats	tools/tests/test_cacheperf.py	/^import icarus.tools.stats as stats$/;"	i
 stats	tools/tests/test_stats.py	/^import icarus.tools as stats$/;"	i
 step_cdf	results/plot.py	/^from icarus.util import Tree, step_cdf$/;"	i

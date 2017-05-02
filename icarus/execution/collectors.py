@@ -25,7 +25,8 @@ __all__ = [
     'LinkLoadCollector',
     'LatencyCollector',
     'PathStretchCollector',
-    'DummyCollector'
+    'DummyCollector',
+    'OverheadCollector'
            ]
 
 
@@ -295,6 +296,39 @@ class LinkLoadCollector(DataCollector):
                      'PER_LINK_INTERNAL': link_loads_int,
                      'PER_LINK_EXTERNAL': link_loads_ext})
 
+@register_data_collector('OVERHEAD')
+class OverheadCollector(DataCollector):
+    """Data collector measuring overhead, i.e. the number of hops traveled by data.
+    """
+    
+    def __init__(self, view, cdf=False):
+        """Constructor
+
+        Parameters
+        ----------
+        view : NetworkView
+            The network view instance
+        cdf : bool, optional
+            If *True*, also collects a cdf of the latency
+        """
+        self.view = view
+        self.sess_count = 0
+        self.content_hops = 0.0
+    
+    @inheritdoc(DataCollector)
+    def start_session(self, timestamp, receiver, content, flow_id=0):
+        self.sess_count += 1
+    
+    @inheritdoc(DataCollector)
+    def content_hop(self, u, v, main_path=True):
+        self.content_hops += 1
+    
+    @inheritdoc(DataCollector)
+    def results(self):
+        overhead = self.content_hops/self.sess_count 
+        results = Tree({'MEAN' : overhead})
+        
+        return results
 
 @register_data_collector('LATENCY')
 class LatencyCollector(DataCollector):
@@ -354,7 +388,7 @@ class LatencyCollector(DataCollector):
         if self.cdf:
             self.latency_data.append(self.sess_latency)
         self.flow_end[flow_id] = timestamp
-        self.last_timestamp = timestamp
+        #self.last_timestamp = timestamp
 
         #del self.flow_end[flow_id]
         #del self.flow_start[flow_id]
@@ -389,12 +423,18 @@ class LatencyCollector(DataCollector):
         results['IDLE_TIMES'] = node_idle_times 
         results['NUM_OF_VMS'] = node_vms
         
-        print "Printing Idle times:"
-        node = 0
-        for idle_time in node_idle_times:
-            print (repr(node) + " " + repr(node_idle_times[node]))
-            node += 1
-        
+        #print "Printing Idle times:"
+        #node = 0
+        #for idle_time in node_idle_times:
+        #    print (repr(node) + " " + repr(node_idle_times[node]))
+        #    node += 1
+        #print ("Flow starts:\n")
+        #for flow in self.flow_start.keys():
+        #    print (repr(flow) + " " + repr(self.flow_start[flow]))
+        #print ("Flow ends:\n")
+        #for flow in self.flow_end.keys():
+        #    print (repr(flow) + " " + repr(self.flow_end[flow]))
+
         return results
 
 @register_data_collector('CACHE_HIT_RATIO')

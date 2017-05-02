@@ -531,6 +531,7 @@ class NetworkModel(object):
                 contents = stack_props['contents']
                 print "Node: " + repr(node)
                 self.source_node[node] = contents
+                print ("Source node: " + repr(node) + " hosts: " + repr(contents))
                 for content in contents:
                     #self.content_source[content] = node
                     # Replaced above line with the below 4 (Onur)
@@ -611,13 +612,13 @@ class NetworkModel(object):
         """
         
         #""" GENERATE Services automatically using min, max ranges for service times and deadlines
-        service_time_min = 0.001
+        service_time_min = 0.1
         service_time_max = 0.1
         delay_min = 0.005
         delay_max = 0.05 #0.015*2+0.005*4
 
-        aFile = open('services.txt', 'w')
-        aFile.write("# ServiceID\tserviceTime\tserviceDeadline\n")
+        #aFile = open('services.txt', 'w')
+        #aFile.write("# ServiceID\tserviceTime\tserviceDeadline\n")
 
         service_indx = 0
         deadlines = []
@@ -635,12 +636,12 @@ class NetworkModel(object):
             service_time = service_times[service_indx]
             deadline = deadlines[service_indx]
 
-            s = str(service_indx) + "\t" + str(service_time) + "\t" + str(deadline) + "\n"
-            aFile.write(s)
+            #s = str(service_indx) + "\t" + str(service_time) + "\t" + str(deadline) + "\n"
+            #aFile.write(s)
             service_indx += 1
             s = Service(service_time, deadline)
             self.services.append(s)
-        aFile.close()
+        #aFile.close()
         #""" #END OF Generating Services
 
         self.compSpot = {node: ComputationalSpot(comp_size[node], n_services, self.services, node,  None) 
@@ -728,7 +729,7 @@ class NetworkController(object):
         if self.collector is not None and self.session[flow_id]['log']:
             self.collector.start_session(timestamp, receiver, content, flow_id)
 
-    def forward_request_path(self, s, t, path=None, main_path=True):
+    def forward_request_path(self, s, t, flow_id, path=None, main_path=True):
         """Forward a request from node *s* to node *t* over the provided path.
 
         Parameters
@@ -747,9 +748,9 @@ class NetworkController(object):
         if path is None:
             path = self.model.shortest_path[s][t]
         for u, v in path_links(path):
-            self.forward_request_hop(u, v, main_path)
+            self.forward_request_hop(u, v, flow_id, main_path)
 
-    def forward_content_path(self, u, v, path=None, main_path=True):
+    def forward_content_path(self, u, v, flow_id, path=None, main_path=True):
         """Forward a content from node *s* to node *t* over the provided path.
 
         Parameters
@@ -769,7 +770,7 @@ class NetworkController(object):
         if path is None:
             path = self.model.shortest_path[u][v]
         for u, v in path_links(path):
-            self.forward_content_hop(u, v, main_path)
+            self.forward_content_hop(u, v, flow_id, main_path)
 
     def forward_request_hop(self, u, v, main_path=True):
         """Forward a request over link  u -> v.
@@ -788,7 +789,7 @@ class NetworkController(object):
         if self.collector is not None and self.session['log']:
             self.collector.request_hop(u, v, main_path)
 
-    def forward_content_hop(self, u, v, main_path=True):
+    def forward_content_hop(self, u, v, flow_id, main_path=True):
         """Forward a content over link  u -> v.
 
         Parameters
@@ -803,7 +804,7 @@ class NetworkController(object):
             calculate latency correctly in multicast cases. Default value is
             *True*
         """
-        if self.collector is not None and self.session['log']:
+        if self.collector is not None and self.session[flow_id]['log']:
             self.collector.content_hop(u, v, main_path)
 
     def put_content(self, node):
