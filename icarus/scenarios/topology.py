@@ -121,22 +121,22 @@ def topology_tree(k, h, delay=0.005, **kwargs):
         topology.edge[u][v]['type'] = 'internal'
         if u is 0 or v is 0:
             topology.edge[u][v]['delay'] = 3*delay
-            print "Edge between " + repr(u) + " and " + repr(v) + " delay: " + repr(topology.edge[u][v]['delay'])
+            #print "Edge between " + repr(u) + " and " + repr(v) + " delay: " + repr(topology.edge[u][v]['delay'])
         else:
             topology.edge[u][v]['delay'] = delay
-            print "Edge between " + repr(u) + " and " + repr(v) + " delay: " + repr(topology.edge[u][v]['delay'])
-    for v in topology.nodes_iter():
-        print "Depth of " + repr(v) + " is " + repr(topology.node[v]['depth'])
+            #print "Edge between " + repr(u) + " and " + repr(v) + " delay: " + repr(topology.edge[u][v]['delay'])
+    #for v in topology.nodes_iter():
+    #    print "Depth of " + repr(v) + " is " + repr(topology.node[v]['depth'])
     
     # set weights and delays on all links
     fnss.set_weights_constant(topology, 1.0)
     #fnss.set_delays_constant(topology, delay, 'ms')
     
     routers = topology.nodes()
-    topology.graph['icr_candidates'] = set(routers)
-    
     edge_routers = [v for v in topology.nodes_iter()
                  if topology.node[v]['depth'] == h]
+    topology.graph['icr_candidates'] = (set(routers)).difference(set(edge_routers))
+    
     root = [v for v in topology.nodes_iter()
                if topology.node[v]['depth'] == 0]
     #routers = [v for v in topology.nodes_iter()
@@ -151,8 +151,6 @@ def topology_tree(k, h, delay=0.005, **kwargs):
     for i in range(n_receivers):
         topology.add_edge(receivers[i], root[0], delay=0.002, type='internal')
 
-    print "The number of sources: " + repr(n_sources) + " " + repr(sources)
-    print "The number of receivers: " + repr(n_receivers) + " " + repr(receivers)
     for v in sources:
         fnss.add_stack(topology, v, 'source')
     for v in receivers:
@@ -161,7 +159,6 @@ def topology_tree(k, h, delay=0.005, **kwargs):
         fnss.add_stack(topology, v, 'router')
     # label links as internal
     return IcnTopology(topology)
-
 
 @register_topology_factory('PATH')
 def topology_path(n, delay=1, **kwargs):

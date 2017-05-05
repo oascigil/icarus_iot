@@ -38,7 +38,7 @@ logger = logging.getLogger('orchestration')
 class Event(object):
     """Implementation of an Event object: arrival of a request to a node"""
 
-    def __init__(self, time, receiver, service, node, flow_id, data_destination, exec_destination, status):
+    def __init__(self, time, receiver, service, node, flow_id, data_destination, exec_destination, source_list, status):
         """Constructor
         Parameters
         ----------
@@ -54,6 +54,7 @@ class Event(object):
         self.flow_id = flow_id
         self.data_destination = data_destination
         self.exec_destination = exec_destination
+        self.source_list = source_list
         self.status = status
 
     def __cmp__(self, other):
@@ -529,9 +530,9 @@ class NetworkModel(object):
                     comp_size[node] = stack_props['computation_size']
             elif stack_name == 'source':
                 contents = stack_props['contents']
-                print "Node: " + repr(node)
+                #print "Node: " + repr(node)
                 self.source_node[node] = contents
-                print ("Source node: " + repr(node) + " hosts: " + repr(contents))
+                #print ("Source node: " + repr(node) + " hosts: " + repr(contents))
                 for content in contents:
                     #self.content_source[content] = node
                     # Replaced above line with the below 4 (Onur)
@@ -626,7 +627,8 @@ class NetworkModel(object):
         random.seed(seed)
 
         for service in range(0, n_services):
-            service_time = random.uniform(service_time_min, service_time_max)
+            source_list = self.content_source[service]
+            service_time = random.uniform(service_time_min, service_time_max)/len(source_list)
             deadline = service_time + random.uniform(delay_min, delay_max) + 2*internal_link_delay
             deadlines.append(deadline)
             service_times.append(service_time)
@@ -874,10 +876,10 @@ class NetworkController(object):
         if node in self.model.cache:
             return self.model.cache[node].remove(self.session['content'])
 
-    def add_event(self, time, receiver, service, node, flow_id, data_destination, exec_destination, status):
+    def add_event(self, time, receiver, service, node, flow_id, data_destination, exec_destination, source_list, status):
         """Add an arrival event to the eventQ
         """
-        e = Event(time, receiver, service, node, flow_id, data_destination, exec_destination, status)
+        e = Event(time, receiver, service, node, flow_id, data_destination, exec_destination, source_list, status)
         heapq.heappush(self.model.eventQ, e)
 
     def replacement_interval_over(self, flow_id, replacement_interval, timestamp):

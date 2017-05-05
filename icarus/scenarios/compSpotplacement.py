@@ -28,12 +28,15 @@ def central_computation_placement(topology, computation_budget, n_services, **kw
     betw = nx.betweenness_centrality(topology)
     root = [v for v in topology.graph['icr_candidates']
             if topology.node[v]['depth'] == 0][0]
-    total_betw = sum(betw.values()) - betw[root]
+    total_betw = sum(betw.values()) 
     icr_candidates = topology.graph['icr_candidates']
+    total = 0
     for v in icr_candidates:
         topology.node[v]['stack'][1]['computation_size'] = iround(computation_budget*betw[v]/total_betw)
-    
-    #topology.node[root]['stack'][1]['computation_size'] = -1 #TODO have a parameter here
+        total += topology.node[v]['stack'][1]['computation_size']
+
+    topology.node[root]['stack'][1]['computation_size'] += int(computation_budget - total)
+     
 
 @register_computation_placement('UNIFORM')
 def uniform_computation_placement(topology, computation_budget, **kwargs):

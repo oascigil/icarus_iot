@@ -91,6 +91,8 @@ class StationaryWorkload(object):
             raise ValueError('beta must be positive')
         self.receivers = [v for v in topology.nodes_iter()
                      if topology.node[v]['stack'][0] == 'receiver']
+        self.sources = [v for v in topology.nodes_iter()
+                     if topology.node[v]['stack'][0] == 'source']
         self.zipf = TruncatedZipfDist(alpha, n_services-1, seed)
         self.n_contents = n_contents
         self.contents = range(0, n_contents)
@@ -114,6 +116,10 @@ class StationaryWorkload(object):
         req_counter = 0
         t_event = 0.0
         flow_id = 0
+        subset_max_size = 5
+        if subset_max_size > len(self.sources):
+            subset_max_size = len(self.sources)/2
+        len_of_subset = range(1, subset_max_size+1)
 
         if self.first: #TODO remove this first variable, this is not necessary here
             random.seed(self.seed)
@@ -128,7 +134,7 @@ class StationaryWorkload(object):
             while eventObj is not None and eventObj.time < t_event:
                 heapq.heappop(self.model.eventQ)
                 log = (req_counter >= self.n_warmup)
-                event = {'receiver' : eventObj.receiver, 'content': eventObj.service, 'log' : log, 'node' : eventObj.node, 'flow_id' : eventObj.flow_id, 'data_destination' : eventObj.data_destination, 'exec_destination' : eventObj.exec_destination, 'status' : eventObj.status}
+                event = {'receiver' : eventObj.receiver, 'content': eventObj.service, 'log' : log, 'node' : eventObj.node, 'flow_id' : eventObj.flow_id, 'data_destination' : eventObj.data_destination, 'exec_destination' : eventObj.exec_destination, 'source_list' :eventObj.source_list ,'status' : eventObj.status}
                 yield (eventObj.time, event)
                 eventObj = self.model.eventQ[0] if len(self.model.eventQ) > 0 else None
 
@@ -140,6 +146,16 @@ class StationaryWorkload(object):
                 receiver = random.choice(self.receivers)
             else:
                 receiver = self.receivers[self.receiver_dist.rv() - 1]
+
+            subset_len = random.choice(len_of_subset)
+            source_list = []
+            num_items = 0
+            while num_items < subset_len:
+                source = random.choice(self.sources)
+                if source not in source_list:
+                    num_items += 1
+                    source_list.append(source)
+
             node = receiver
             content = int(self.zipf.rv())
             log = (req_counter >= self.n_warmup)
@@ -147,7 +163,7 @@ class StationaryWorkload(object):
             #deadline = self.model.services[content].deadline + t_event
             data_destination = -1
             exec_destination = -1
-            event = {'receiver': receiver, 'content' : content, 'log' : log, 'node' : node ,'flow_id': flow_id, 'data_destination': data_destination, 'exec_destination' : exec_destination, 'status' : 0}
+            event = {'receiver': receiver, 'content' : content, 'log' : log, 'node' : node ,'flow_id': flow_id, 'data_destination': data_destination, 'exec_destination' : exec_destination, 'source_list' : source_list ,'status' : 0}
             neighbors = self.topology.neighbors(receiver)
             #s = str(t_event) + "\t" + str(neighbors[0]) + "\t" + str(content) + "\n"
             #aFile.write(s)

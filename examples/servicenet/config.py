@@ -25,7 +25,9 @@ N_PROCESSES = 1 #cpu_count()
 CACHING_GRANULARITY = 'OBJECT'
 
 # Warm-up strategy
-WARMUP_STRATEGY = 'LEAST_CONGESTED'
+#WARMUP_STRATEGY = 'LEAST_CONGESTED'
+#WARMUP_STRATEGY = 'MIN_DATA_TRANSFER'
+WARMUP_STRATEGY = 'NAIVE'
 
 # Format in which results are saved.
 # Result readers and writers are located in module ./icarus/results/readwrite.py
@@ -70,7 +72,7 @@ NETWORK_REQUEST_RATE = 500.0
 
 # Number of content requests generated to prepopulate the caches
 # These requests are not logged
-N_WARMUP_REQUESTS = 100 #30000
+N_WARMUP_REQUESTS = 0 #30000
 
 # Number of content requests generated after the warmup and logged
 # to generate results. 
@@ -79,15 +81,17 @@ N_MEASURED_REQUESTS = 10*NETWORK_REQUEST_RATE
 # List of all implemented topologies
 # Topology implementations are located in ./icarus/scenarios/topology.py
 TOPOLOGIES =  ['TREE']
-TREE_DEPTH = 3
-BRANCH_FACTOR = 2
+TREE_DEPTH = 2
+BRANCH_FACTOR = 10
 
 # Replacement Interval
 REPLACEMENT_INTERVAL = 10
 
 # List of caching and routing strategies
 # The code is located in ./icarus/models/strategy.py
-STRATEGIES = ['LEAST_CONGESTED']  # service-based routing
+#STRATEGIES = ['LEAST_CONGESTED']  # service-based routing
+STRATEGIES = ['MIN_DATA_TRANSFER', 'NAIVE', 'LEAST_CONGESTED']  # service-based routing
+#STRATEGIES = ['NAIVE']  # service-based routing
 
 # Cache replacement policy used by the network caches.
 # Supported policies are: 'LRU', 'LFU', 'FIFO', 'RAND' and 'NULL'
