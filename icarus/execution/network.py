@@ -528,7 +528,7 @@ class NetworkModel(object):
                     cache_size[node] = stack_props['cache_size']
                 if 'computation_size' in stack_props:
                     comp_size[node] = stack_props['computation_size']
-            elif stack_name == 'source':
+            elif stack_name == 'source' and 'contents' in stack_props:
                 contents = stack_props['contents']
                 #print "Node: " + repr(node)
                 self.source_node[node] = contents

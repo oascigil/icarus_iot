@@ -18,7 +18,7 @@ PARALLEL_EXECUTION = True
 
 # Number of processes used to run simulations in parallel.
 # This option is ignored if PARALLEL_EXECUTION = False
-N_PROCESSES = 1 #cpu_count()
+N_PROCESSES = 3 #cpu_count()
 
 # Granularity of caching.
 # Currently, only OBJECT is supported
@@ -68,20 +68,20 @@ N_SERVICES = N_CONTENTS
 
 # Number of requests per second (over the whole network)
 #NETWORK_REQUEST_RATE = 10.0
-NETWORK_REQUEST_RATE = 500.0
+NETWORK_REQUEST_RATE = 50.0
 
 # Number of content requests generated to prepopulate the caches
 # These requests are not logged
-N_WARMUP_REQUESTS = 0 #30000
+N_WARMUP_REQUESTS = 1*NETWORK_REQUEST_RATE  #30000
 
 # Number of content requests generated after the warmup and logged
 # to generate results. 
-N_MEASURED_REQUESTS = 10*NETWORK_REQUEST_RATE 
+N_MEASURED_REQUESTS = 60*NETWORK_REQUEST_RATE 
 
 # List of all implemented topologies
 # Topology implementations are located in ./icarus/scenarios/topology.py
 TOPOLOGIES =  ['TREE']
-TREE_DEPTH = 2
+TREE_DEPTH = 4
 BRANCH_FACTOR = 10
 
 # Replacement Interval
@@ -90,7 +90,7 @@ REPLACEMENT_INTERVAL = 10
 # List of caching and routing strategies
 # The code is located in ./icarus/models/strategy.py
 #STRATEGIES = ['LEAST_CONGESTED']  # service-based routing
-STRATEGIES = ['MIN_DATA_TRANSFER', 'NAIVE', 'LEAST_CONGESTED']  # service-based routing
+STRATEGIES = ['LEAST_CONGESTED'] #'MIN_DATA_TRANSFER',] # 'NAIVE', 'LEAST_CONGESTED']  # service-based routing
 #STRATEGIES = ['NAIVE']  # service-based routing
 
 # Cache replacement policy used by the network caches.
@@ -113,20 +113,20 @@ default['workload'] = {'name':       'STATIONARY',
 default['cache_placement']['name'] = 'UNIFORM'
 default['computation_placement']['name'] = 'CENTRALITY'
 default['computation_placement']['n_services'] = N_SERVICES
-default['computation_placement']['computation_budget'] = N_SERVICES/2 #*5
+default['computation_placement']['computation_budget'] = 50 #N_SERVICES/2 #*5
 default['content_placement']['name'] = 'REPLICATED'
 default['cache_policy']['name'] = CACHE_POLICY
 
 default['topology']['name'] = 'TREE'
 default['topology']['k'] = BRANCH_FACTOR
 default['topology']['h'] = TREE_DEPTH
-default['warmup_strategy']['name'] = WARMUP_STRATEGY
 
 # Create experiments multiplexing all desired parameters
 for alpha in ALPHA:
     for strategy in STRATEGIES:
         for network_cache in NETWORK_CACHE:
             experiment = copy.deepcopy(default)
+            experiment['warmup_strategy']['name'] = strategy
             experiment['workload']['alpha'] = alpha
             experiment['strategy']['name'] = strategy
             experiment['strategy']['replacement_interval'] = REPLACEMENT_INTERVAL

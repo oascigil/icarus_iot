@@ -132,11 +132,9 @@ def replicated_content_placement(topology, contents, seed=None):
     """
     random.seed(seed)
     source_nodes = get_sources(topology)
-    subsets = [x for x in powerset(source_nodes)]
-    subsets.pop() # Remove the last (empty list) element
     content_placement = collections.defaultdict(set)
     for c in contents:
-        subset = random.choice(subsets)
+        subset = [random.choice(source_nodes)]
         for node in subset:
             content_placement[node].add(c)
     apply_content_placement(content_placement, topology)

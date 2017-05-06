@@ -135,7 +135,8 @@ def topology_tree(k, h, delay=0.005, **kwargs):
     routers = topology.nodes()
     edge_routers = [v for v in topology.nodes_iter()
                  if topology.node[v]['depth'] == h]
-    topology.graph['icr_candidates'] = (set(routers)).difference(set(edge_routers))
+    #topology.graph['icr_candidates'] = (set(routers)).difference(set(edge_routers))
+    topology.graph['icr_candidates'] = set(routers)
     
     root = [v for v in topology.nodes_iter()
                if topology.node[v]['depth'] == 0]

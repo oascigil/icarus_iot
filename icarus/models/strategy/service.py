@@ -144,7 +144,7 @@ class LeastCongestedStrategy(Strategy):
                 self.flow_copies[flow_id] -= 1
                 if self.flow_copies[flow_id] == 0:
                     self.controller.end_session(True, time, flow_id)
-                    del self.flow_copies[flow_id]
+                    #del self.flow_copies[flow_id]
                 return
             else:
                 if self.debug:

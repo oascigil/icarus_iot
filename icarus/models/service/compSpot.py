@@ -38,7 +38,8 @@ class ComputationalSpot(object):
         self.numOfVMs = numOfVMs
         if self.numOfVMs == 0:
             self.numOfVMs = 1
-        print ("Number of VMs @node: " + repr(node) + " " + repr(numOfVMs))
+            numOfVMs = 1
+        #print ("Number of VMs @node: " + repr(node) + " " + repr(self.numOfVMs))
         self.n_services = n_services
         # number of VMs per service
         self.vm_counts = {x : 0 for x in range(0, n_services)}
